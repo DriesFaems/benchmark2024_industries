@@ -13,7 +13,7 @@ st.title('European Scaleup Monitor: Bechmarking of industries in Europe')
 
 # add subheader
 
-st.subheader('This benchmarking tool allows you to compare different industries on different growth metrics. For more information on the European Scaleup Institute, visit https://scaleupinstitute.eu/. For more information on this benchmark tool, please reach out to Dries Faems (https://www.linkedin.com/in/dries-faems-0371569/)')
+st.subheader('This benchmarking tool allows you to compare different industries on different growth metrics. For more information on the European Scaleup Institute, visit https://scaleupinstitute.eu/. For more information on this benchmark tool, please reach out to info@scaleupinstitute.eu')
 
 
 
@@ -21,25 +21,24 @@ st.subheader('This benchmarking tool allows you to compare different industries 
 countries = df_long['NACE Rev. 2 main section'].unique()
 selected_countries = st.multiselect('Select industries', countries, default=countries[0])
 
-metrics = ['Scaler', 'HighGrowthFirm', 'Consistent HighGrowthFirm', 'Consistent Hypergrower', 'Gazelle', 'Mature HighGrowthFirm', 'Scaleup', 'Superstar']
+metrics = ['Scaler (companies with average annual growth rate of 10% in past three years)', 'HighGrowthFirm (companies with average annual growth rate of 20% in past three years)', 'Consistent HighGrowthFirm (high growth companies that grew 20% in at least 2 of the past three years)', 'Consistent Hypergrower (high growth companies that grew 40% in at least 2 of the past three years)', 'Gazelle (consistent high growth firm that is younger than 10 years)', 'Mature HighGrowthFirm (consistent high growth firm that is older than 10 years)', 'Scaleup (consistent hypergrower that is younger than 10 years)', 'Superstar (consistent hypergrower that is older than 10 years)' ]
 selected = st.selectbox('Select metrics', metrics)
-if selected == 'Scaler':
+if selected == 'Scaler (companies with average annual growth rate of 10% in past three years)':
     selected_metrics = 'Scaler'
-if selected == 'HighGrowthFirm':
+if selected == 'HighGrowthFirm (companies with average annual growth rate of 20% in past three years)':
     selected_metrics = 'HighGrowthFirm'
-if selected == 'Consistent HighGrowthFirm':
+if selected == 'Consistent HighGrowthFirm (high growth companies that grew 20% in at least 2 of the past three years)':
     selected_metrics = 'ConsistentHighGrowthFirm'
-if selected == 'Consistent Hypergrower':
+if selected == 'Consistent Hypergrower (high growth companies that grew 40% in at least 2 of the past three years)':
     selected_metrics = 'VeryHighGrowthFirm'
-if selected == 'Gazelle':
+if selected == 'Gazelle (consistent high growth firm that is younger than 10 years)':
     selected_metrics = 'Gazelle'
-if selected == 'Mature HighGrowthFirm':
+if selected == 'Mature HighGrowthFirm (consistent high growth firm that is older than 10 years)':
     selected_metrics = 'Mature'
-if selected == 'Scaleup':
+if selected == 'Scaleup (consistent hypergrower that is younger than 10 years)':
     selected_metrics = 'Scaleup'
-if selected == 'Superstar':
+if selected == 'Superstar (consistent hypergrower that is older than 10 years)':
     selected_metrics = 'Superstar'
-
 
 # Filtering data
 filtered_data = df_long[df_long['NACE Rev. 2 main section'].isin(selected_countries)]
@@ -81,6 +80,38 @@ if clicked:
     ax.set_ylabel(selected_metrics+ ' %')
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15))
     st.pyplot(fig)
+
+    listrelevantcolumns = ['NACE Rev. 2 main section']
+    for i in range(len(filtered_data.columns)):
+        if selected_metrics in filtered_data.columns[i]:
+            listrelevantcolumns.append(filtered_data.columns[i])
+    newtable = filtered_data[listrelevantcolumns]
+
+    # change column names
+
+    newtable.columns = newtable.columns.to_series().replace(selected_metrics + ' 2022 Obs', 'Total number of observed companies in 2022') \
+    .replace(selected_metrics + ' 2022 Num', 'Number of ' + selected_metrics + 's in 2022') \
+    .replace(selected_metrics + ' 2022 %', 'Percentage of ' + selected_metrics + 's in 2022') \
+    .replace(selected_metrics + ' 2021 Obs', 'Total number of observed companies in 2021') \
+    .replace(selected_metrics + ' 2021 Num', 'Number of ' + selected_metrics + 's in 2021') \
+    .replace(selected_metrics + ' 2021 %', 'Percentage of ' + selected_metrics + 's in 2021') \
+    .replace(selected_metrics + ' 2020 Obs', 'Total number of observed companies in 2020') \
+    .replace(selected_metrics + ' 2020 Num', 'Number of ' + selected_metrics + 's in 2020') \
+    .replace(selected_metrics + ' 2020 %', 'Percentage of ' + selected_metrics + 's in 2020') \
+    .replace(selected_metrics + ' 2019 Obs', 'Total number of observed companies in 2019') \
+    .replace(selected_metrics + ' 2019 Num', 'Number of ' + selected_metrics + 's in 2019') \
+    .replace(selected_metrics + ' 2019 %', 'Percentage of ' + selected_metrics + 's in 2019') \
+    .replace(selected_metrics + ' 2018 Obs', 'Total number of observed companies in 2018') \
+    .replace(selected_metrics + ' 2018 Num', 'Number of ' + selected_metrics + 's in 2018') \
+    .replace(selected_metrics + ' 2018 %', 'Percentage of ' + selected_metrics + 's in 2018')
+
+    # set index to country
+
+    newtable = newtable.set_index('NACE Rev. 2 main section')
+
+    #print newtable as table in streamlit
+
+    st.write(newtable)
 
 else:
     st.write('Click to show data')
